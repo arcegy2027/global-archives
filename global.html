@@ -36,6 +36,7 @@
     overflow:hidden;
     height:100vh;
     width:100vw;
+    -webkit-tap-highlight-color: transparent;
   }
   ::selection{background:var(--cyan);color:var(--void);}
   a{color:inherit;}
@@ -43,18 +44,57 @@
   :focus-visible{outline:2px solid var(--focus);outline-offset:2px;border-radius:4px;}
 
   /* ---------- App shell ---------- */
-  #app{position:relative;height:100vh;width:100vw;}
+  #app{position:relative;height:100vh;width:100vw; overflow:hidden;}
+  #app::before{
+    content:''; position:absolute; inset:-10%; pointer-events:none;
+    background:
+      radial-gradient(circle at 18% 28%, rgba(56,189,248,0.18), transparent 20%),
+      radial-gradient(circle at 70% 14%, rgba(99,102,241,0.18), transparent 22%),
+      radial-gradient(circle at 60% 78%, rgba(245,158,11,0.16), transparent 26%);
+    filter:blur(30px);
+    z-index:0;
+  }
+  #app::after{
+    content:''; position:absolute; inset:0; pointer-events:none;
+    background-image:
+      radial-gradient(circle at 15% 15%, rgba(255,255,255,0.24) 0, transparent 1.2px),
+      radial-gradient(circle at 75% 28%, rgba(255,255,255,0.18) 0, transparent 1.5px),
+      radial-gradient(circle at 45% 70%, rgba(255,255,255,0.2) 0, transparent 1.3px);
+    background-size:180px 180px; opacity:0.4; z-index:0;
+  }
 
-  #canvas-wrap{position:absolute;inset:0;}
-  #globe-canvas{display:block;width:100%;height:100%;cursor:grab;}
+  #canvas-wrap{position:absolute;inset:0; z-index:1;}
+  #globe-canvas{display:block;width:100%;height:100%;cursor:grab;touch-action:none;user-select:none;}
   #globe-canvas.dragging{cursor:grabbing;}
 
   #hint{
     position:absolute; bottom:28px; left:50%; transform:translateX(-50%);
     font-size:12.5px; color:var(--text-faint); letter-spacing:.02em;
-    pointer-events:none; transition:opacity .6s ease;
+    pointer-events:none; transition:opacity .6s ease; z-index:12;
   }
   #hint.hide{opacity:0;}
+
+  .feature-bar{
+    position:absolute; left:28px; bottom:52px; z-index:18; pointer-events:none;
+  }
+  .feature-card{
+    pointer-events:auto; min-width:220px; max-width:280px;
+    border:1px solid var(--border-strong); border-radius:14px;
+    background:rgba(10,16,24,0.42); backdrop-filter:blur(14px);
+    box-shadow:0 18px 40px rgba(0,0,0,0.22);
+    padding:12px 14px 11px; color:var(--text);
+  }
+  .feature-card .eyebrow{
+    display:block; font-size:9.5px; letter-spacing:.12em; text-transform:uppercase;
+    color:var(--text-faint); margin-bottom:7px;
+  }
+  .feature-row{display:flex; align-items:center; justify-content:space-between; gap:12px;}
+  .feature-name{font-family:var(--font-display); font-size:18px; line-height:1.2; color:var(--text);}
+  .feature-sub{color:var(--text-muted); font-size:11.5px; margin-top:4px;}
+  .feature-pill{
+    flex-shrink:0; padding:6px 8px; border-radius:999px; border:1px solid rgba(56,189,248,0.35);
+    background:rgba(56,189,248,0.08); color:var(--cyan); font-size:9px; letter-spacing:.08em; text-transform:uppercase;
+  }
 
   /* ---------- Top bar ---------- */
   header{
@@ -295,11 +335,57 @@
   ::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.12); border-radius:4px;}
 
   @media (max-width: 640px){
-    #drawer{width:100vw;}
-    header{padding:16px;}
-    .search-trigger{min-width:0; padding:9px 11px;}
-    .search-trigger span.label{display:none;}
-    #grid-fallback .grid-wrap{grid-template-columns:1fr 1fr;}
+    body{overflow:hidden;}
+    header{
+      padding:14px 14px 0;
+      align-items:flex-start;
+      gap:10px;
+    }
+    .brand{gap:8px;}
+    .brand-mark{width:30px;height:30px;border-radius:8px;}
+    .brand-text .name{font-size:14px;}
+    .brand-text .sub{font-size:8.5px; letter-spacing:.08em;}
+    .search-trigger{
+      min-width:44px; width:44px; height:42px; padding:0; justify-content:center;
+      border-radius:12px; background:rgba(17,24,39,0.72);
+    }
+    .search-trigger .label, .search-trigger .kbd{display:none;}
+    .feature-bar{left:14px; right:14px; bottom:26px;}
+    .feature-card{max-width:none; min-width:0; width:100%; padding:10px 12px;}
+    .feature-row{align-items:flex-start;}
+    .feature-name{font-size:15px;}
+    .feature-sub{font-size:10.5px;}
+    .feature-pill{padding:5px 7px; font-size:8px;}
+    #hint{
+      bottom:90px; width:calc(100% - 32px); text-align:center; font-size:11px; line-height:1.4;
+      white-space:normal;
+    }
+    #tooltip{max-width:calc(100vw - 28px); white-space:normal;}
+    #cmdk{width:min(92vw, 420px); border-radius:12px;}
+    #cmdk-input-row{padding:12px 14px; gap:8px;}
+    #cmdk-list{max-height:260px;}
+    .cmdk-item{padding:10px 10px;}
+    .cmdk-item .meta{display:none;}
+    #drawer{
+      width:100vw; height:min(78vh, 540px); top:auto; bottom:0; right:0; left:0;
+      border-left:none; border-top:1px solid var(--border-strong);
+      transform:translateY(105%);
+      box-shadow:0 -18px 40px rgba(0,0,0,0.35);
+    }
+    #drawer.open{transform:translateY(0);}
+    .drawer-top{padding:16px 16px;}
+    .drawer-actions{gap:5px;}
+    .icon-btn{width:30px;height:30px;}
+    .drawer-section{padding:16px;}
+    .fact-grid, .doc-grid{grid-template-columns:1fr 1fr;}
+    .doc-card{min-height:112px; padding:12px 11px;}
+    .doc-card .doc-title{font-size:12px;}
+    .doc-card .doc-desc{font-size:10.5px;}
+    #lightbox{width:min(88vw, 420px); padding:28px 18px;}
+    #lightbox h3{font-size:17px;}
+    #lightbox p{font-size:12.5px;}
+    #grid-fallback{padding:80px 14px 20px;}
+    #grid-fallback .grid-wrap{grid-template-columns:1fr;}
   }
 
   @media (prefers-reduced-motion: reduce){
@@ -339,6 +425,20 @@
   <div id="canvas-wrap">
     <canvas id="globe-canvas"></canvas>
   </div>
+
+  <div class="feature-bar" aria-live="polite">
+    <div class="feature-card">
+      <span class="eyebrow">Featured archive</span>
+      <div class="feature-row">
+        <div>
+          <div class="feature-name" id="feature-name">Egypt</div>
+          <div class="feature-sub" id="feature-sub">41% digitized · 12M+ items</div>
+        </div>
+        <div class="feature-pill">Live</div>
+      </div>
+    </div>
+  </div>
+
   <div id="hint">Drag to rotate · Scroll to zoom · Click a node to open its archive</div>
 
   <div id="tooltip" role="status">
@@ -578,8 +678,16 @@ const drawer = $('#drawer');
 const drawerScroll = $('#drawer-scroll');
 const scrim = $('#scrim');
 const hint = $('#hint');
+const featureName = $('#feature-name');
+const featureSub = $('#feature-sub');
 let bookmarks = new Set();
 let lastFocused = null;
+
+function updateFeaturedCard(country){
+  if(!country || !featureName || !featureSub) return;
+  featureName.textContent = country.name;
+  featureSub.textContent = country.digit + ' digitized · ' + country.storage;
+}
 
 /* ============================================================
    3D GLOBE
@@ -605,14 +713,23 @@ function latLonToVec3(lat, lon, r){
 
 function initGlobe(){
   try{
-    renderer = new THREE.WebGLRenderer({canvas, antialias:true, alpha:true});
+    renderer = new THREE.WebGLRenderer({canvas, antialias:true, alpha:true, powerPreference:'high-performance'});
   }catch(e){ webglOK = false; }
   if(!renderer || !window.WebGLRenderingContext){
     webglOK = false;
   }
   if(!webglOK){ showFallback(); return; }
 
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio||1, 2));
+  const isPhone = window.matchMedia('(max-width: 640px)').matches;
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, isPhone ? 1.5 : 2));
+  if(isPhone){
+    targetDistance = 7.2;
+    distance = 7.2;
+    targetRotY = -0.25;
+    rotY = -0.25;
+    targetRotX = -0.22;
+    rotX = -0.22;
+  }
   scene = new THREE.Scene();
   camera = new THREE.PerspectiveCamera(42, innerWidth/innerHeight, 0.1, 100);
   camera.position.set(0,0,distance);
@@ -802,8 +919,11 @@ function animate(){
     m.ring.scale.set(s,s,s);
     const isHover = hovered===m.data.id;
     m.mesh.scale.setScalar(isHover?1.6:1);
+    const ringOpacity = isHover ? 0.9 : 0.55;
+    m.ring.material.opacity = ringOpacity;
   });
 
+  group.rotation.z = Math.sin(t * 0.38) * 0.04;
   renderer.render(scene, camera);
 }
 
@@ -921,6 +1041,7 @@ function openDrawer(id){
   const c = byId[id];
   if(!c) return;
   lastFocused = document.activeElement;
+  updateFeaturedCard(c);
   renderDrawer(c);
   scrim.classList.add('open');
   drawer.classList.add('open');
@@ -1029,13 +1150,14 @@ document.addEventListener('keydown', e=>{
    INIT
    ============================================================ */
 function checkLowPower(){
-  const narrow = innerWidth < 720;
   const noGL = !(function(){
     try{ const c=document.createElement('canvas'); return !!(window.WebGLRenderingContext && (c.getContext('webgl')||c.getContext('experimental-webgl'))); }
     catch(e){ return false; }
   })();
-  return narrow || noGL;
+  return noGL;
 }
+
+updateFeaturedCard(byId.eg);
 
 if(checkLowPower()){
   showFallback();
